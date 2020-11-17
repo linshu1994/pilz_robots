@@ -98,21 +98,14 @@ if(CATKIN_ENABLE_TESTING)
   )
   #----------------------------------
 
-  # --- sleep unit test ---
-  catkin_add_gtest(unittest_sleep
-    test/unittest_sleep.cpp
-  )
-  target_link_libraries(unittest_sleep
-    ${catkin_LIBRARIES}
-  )
-  #----------------------------------
-
   # to run: catkin_make -DENABLE_COVERAGE_TESTIN=ON package_name_coverage (adding -j1 recommended)
   if(ENABLE_COVERAGE_TESTING)
     set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
     add_code_coverage(
       NAME ${PROJECT_NAME}_coverage
-      DEPENDENCIES tests
+      # specifying dependencies in a reliable way is on open issue
+      # see https://github.com/mikeferguson/code_coverage/pull/14
+      #DEPENDENCIES tests
     )
   endif()
 endif()

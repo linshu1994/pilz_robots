@@ -21,14 +21,13 @@
 #include <vector>
 #include <errno.h>
 #include <limits>
-#include <stdexcept>
-
+#include <thread>
 #include <prbt_hardware_support/libmodbus_client.h>
+#include <prbt_hardware_support/modbus_check_ip_connection.h>
 #include <prbt_hardware_support/pilz_modbus_exceptions.h>
 
 namespace prbt_hardware_support
 {
-
 LibModbusClient::~LibModbusClient()
 {
   close();
@@ -36,22 +35,41 @@ LibModbusClient::~LibModbusClient()
 
 bool LibModbusClient::init(const char* ip, unsigned int port)
 {
+  // The following check results from Ubuntu 18.04 using libmodbus 3.0.6 where a timeout cannot be set on
+  // modbus_connect.
+  // As a result trying to connect with to a wrong address could modbus_connect could get stuck for up to over 100
+  // seconds. The precheck lowers this risk by performing a quick connect to the given address.
+  //
+  // If you read this comment at a time where Ubuntu 18.04 is no longer relevant please remove this check and define a
+  // timeout for modbus_connect(). Thank you!
+  if (!checkIPConnection(ip, port))
+  {
+    ROS_ERROR_STREAM("Precheck for connection to " << ip << ":" << port << " failed. " << modbus_strerror(errno)
+                                                   << ".");
+    return false;
+  }
+
   modbus_connection_ = modbus_new_tcp(ip, static_cast<int>(port));
 
   if (modbus_connect(modbus_connection_) == -1)
   {
-    ROS_ERROR_STREAM_NAMED("LibModbusClient", "Could not establish modbus connection." << modbus_strerror(errno));
+    // LCOV_EXCL_START the following lines are hard to cover since the above checkIPConnection should prevent
+    // exactly this situation
+    ROS_ERROR_STREAM_NAMED("LibModbusClient",
+                           "Could not establish modbus connection. " << modbus_strerror(errno) << ".");
     modbus_free(modbus_connection_);
     modbus_connection_ = nullptr;
     return false;
+    // LCOV_EXCL_STOP
   }
+
   return true;
 }
 
 void LibModbusClient::setResponseTimeoutInMs(unsigned long timeout_ms)
 {
   struct timeval response_timeout;
-  response_timeout.tv_sec = timeout_ms/1000;
+  response_timeout.tv_sec = timeout_ms / 1000;
   response_timeout.tv_usec = (timeout_ms % 1000) * 1000;
   modbus_set_response_timeout(modbus_connection_, &response_timeout);
 }
@@ -60,19 +78,19 @@ unsigned long LibModbusClient::getResponseTimeoutInMs()
 {
   struct timeval response_timeout;
   modbus_get_response_timeout(modbus_connection_, &response_timeout);
-  return static_cast<unsigned long>(response_timeout.tv_sec * 1000L + (response_timeout.tv_usec  / 1000L));
+  return static_cast<unsigned long>(response_timeout.tv_sec * 1000L + (response_timeout.tv_usec / 1000L));
 }
 
 RegCont LibModbusClient::readHoldingRegister(int addr, int nb)
 {
   ROS_DEBUG("readHoldingRegister()");
-  if(modbus_connection_ == nullptr)
+  if (modbus_connection_ == nullptr)
   {
     throw ModbusExceptionDisconnect("Modbus disconnected!");
   }
 
   RegCont tab_reg(static_cast<RegCont::size_type>(nb));
-  int rc {-1};
+  int rc{ -1 };
 
   rc = modbus_read_registers(modbus_connection_, addr, nb, tab_reg.data());
   if (rc == -1)
@@ -88,11 +106,10 @@ RegCont LibModbusClient::readHoldingRegister(int addr, int nb)
   return tab_reg;
 }
 
-RegCont LibModbusClient::writeReadHoldingRegister(const int write_addr,
-                                                  const RegCont& write_reg,
-                                                  const int read_addr, const int read_nb)
+RegCont LibModbusClient::writeReadHoldingRegister(const int write_addr, const RegCont& write_reg, const int read_addr,
+                                                  const int read_nb)
 {
-  if(modbus_connection_ == nullptr)
+  if (modbus_connection_ == nullptr)
   {
     throw ModbusExceptionDisconnect("Modbus disconnected!");
   }
@@ -108,13 +125,12 @@ RegCont LibModbusClient::writeReadHoldingRegister(const int write_addr,
     throw std::invalid_argument("Argument \"write_reg\" must not exceed max value of type \"int\"");
   }
 
-  int rc {-1};
-  rc = modbus_write_and_read_registers(modbus_connection_,
-                                       write_addr, static_cast<int>(write_reg.size()), write_reg.data(),
-                                       read_addr, read_nb, read_reg.data());
+  int rc{ -1 };
+  rc = modbus_write_and_read_registers(modbus_connection_, write_addr, static_cast<int>(write_reg.size()),
+                                       write_reg.data(), read_addr, read_nb, read_reg.data());
   ROS_DEBUG_NAMED("LibModbusClient", "modbus_write_and_read_registers: writing from %i %i registers\
                                       and reading from %i %i registers",
-                                      write_addr, static_cast<int>(write_reg.size()), read_addr, read_nb);
+                  write_addr, static_cast<int>(write_reg.size()), read_addr, read_nb);
   if (rc == -1)
   {
     std::string err = "Failed to write and read modbus registers: ";
@@ -136,4 +152,4 @@ void LibModbusClient::close()
   }
 }
 
-} // namespace prbt_hardware_support
+}  // namespace prbt_hardware_support

@@ -19,12 +19,14 @@
 
 #include <prbt_hardware_support/ModbusMsgInStamped.h>
 #include <prbt_hardware_support/OperationModes.h>
+#include <prbt_hardware_support/modbus_api_definitions.h>
 #include <prbt_hardware_support/modbus_api_spec.h>
 #include <prbt_hardware_support/modbus_msg_wrapper.h>
 #include <prbt_hardware_support/modbus_msg_operation_mode_wrapper_exception.h>
 
 namespace prbt_hardware_support
 {
+using namespace modbus_api::v3;
 
 /**
  * @brief Wrapper class to add semantic to a raw ModbusMsgInStamped
@@ -58,7 +60,6 @@ public:
   OperationModes getTimeStampedOperationMode() const;
 
 private:
-
   /**
    * @brief Check if the message contains a operation mode definition.
    *
@@ -68,8 +69,8 @@ private:
 };
 
 inline ModbusMsgOperationModeWrapper::ModbusMsgOperationModeWrapper(const ModbusMsgInStampedConstPtr& modbus_msg_raw,
-                                                                    const ModbusApiSpec& api_spec):
-  ModbusMsgWrapper(modbus_msg_raw, api_spec)
+                                                                    const ModbusApiSpec& api_spec)
+  : ModbusMsgWrapper(modbus_msg_raw, api_spec)
 {
 }
 
@@ -80,18 +81,18 @@ inline bool ModbusMsgOperationModeWrapper::hasOperationMode() const
 
 inline int8_t ModbusMsgOperationModeWrapper::getOperationMode() const
 {
-  switch(getRegister(getApiSpec().getRegisterDefinition(modbus_api_spec::OPERATION_MODE)))
+  switch (getRegister(getApiSpec().getRegisterDefinition(modbus_api_spec::OPERATION_MODE)))
   {
-    case 0:
-            return OperationModes::UNKNOWN;
-    case 1:
-            return OperationModes::T1;
-    case 2:
-            return OperationModes::T2;
-    case 3:
-            return OperationModes::AUTO;
+    case MODBUS_OPERATION_MODE_NONE:
+      return OperationModes::UNKNOWN;
+    case MODBUS_OPERATION_MODE_T1:
+      return OperationModes::T1;
+    case MODBUS_OPERATION_MODE_T2:
+      return OperationModes::T2;
+    case MODBUS_OPERATION_MODE_AUTO:
+      return OperationModes::AUTO;
     default:
-            return OperationModes::UNKNOWN;
+      return OperationModes::UNKNOWN;
   }
 }
 
@@ -107,12 +108,13 @@ inline void ModbusMsgOperationModeWrapper::checkStructuralIntegrity() const
 {
   ModbusMsgWrapper::checkStructuralIntegrity();
 
-  if(!hasOperationMode())
+  if (!hasOperationMode())
   {
-    throw ModbusMsgOperationModeWrapperException("Received message does not contain information about the operation mode.");
+    throw ModbusMsgOperationModeWrapperException("Received message does not contain information about the operation "
+                                                 "mode.");
   }
 }
 
-}
+}  // namespace prbt_hardware_support
 
-#endif // MODBUS_MSG_OPERATION_MODE_WRAPPER_H
+#endif  // MODBUS_MSG_OPERATION_MODE_WRAPPER_H

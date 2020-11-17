@@ -2,6 +2,29 @@
 Changelog for package prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.19 (2020-09-07)
+-------------------
+* Move ikfast plugin test to prbt_moveit_config (#450)
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.18 (2020-07-02)
+-------------------
+
+0.5.17 (2020-06-22)
+-------------------
+
+0.5.16 (2020-05-15)
+-------------------
+* Update and apply clang-format (#387)
+* Make test-subfolder-names consistent (#380)
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.15 (2020-05-03)
+-------------------
+
+0.5.14 (2020-03-11)
+-------------------
+
 0.5.13 (2019-12-04)
 -------------------
 

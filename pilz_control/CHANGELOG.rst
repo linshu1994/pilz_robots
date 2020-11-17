@@ -2,6 +2,39 @@
 Changelog for package pilz_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.19 (2020-09-07)
+-------------------
+* Add tolerance to speed-limit acceptance-test (#436)
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.18 (2020-07-02)
+-------------------
+* Make AsyncTest header-only
+* Extends robot mock
+* Fixes result of follow_joint_trajectory action
+* Rename triggerCancellingOfActiveGoal() -> cancelActiveGoal()
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.17 (2020-06-22)
+-------------------
+* Add cartesian speed monitoring to pilz joint trajectory controller
+* Deactivate command interface in PilzJointTrajectoryController
+* Add joint acceleration limits to pilz joint trajectory controller
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.16 (2020-05-15)
+-------------------
+* Update and apply clang-format (#387)
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.15 (2020-05-03)
+-------------------
+* Introduce goal_time_tolerance to PJTC function is_executing
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.14 (2020-03-11)
+-------------------
+
 0.5.13 (2019-12-04)
 -------------------
 

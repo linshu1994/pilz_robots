@@ -19,14 +19,11 @@
 
 namespace prbt_hardware_support
 {
-
-Stop1Executor::Stop1Executor(const TServiceCallFunc& hold_func,
-                             const TServiceCallFunc& unhold_func,
-                             const TServiceCallFunc& recover_func,
-                             const TServiceCallFunc& halt_func)
+Stop1Executor::Stop1Executor(const TServiceCallFunc& hold_func, const TServiceCallFunc& unhold_func,
+                             const TServiceCallFunc& recover_func, const TServiceCallFunc& halt_func)
 {
-  state_machine_ = std::unique_ptr<StoStateMachine>(
-        new StoStateMachine(recover_func, halt_func, hold_func, unhold_func) );
+  state_machine_ = std::unique_ptr<RunPermittedStateMachine>(
+      new RunPermittedStateMachine(recover_func, halt_func, hold_func, unhold_func));
 
   state_machine_->start();
 
@@ -48,20 +45,19 @@ Stop1Executor::~Stop1Executor()
   stopStateMachine();
 }
 
-void Stop1Executor::updateSto(const bool sto)
+void Stop1Executor::updateRunPermitted(const bool run_permitted)
 {
-  ROS_DEBUG_STREAM("updateSto(" << std::boolalpha << sto << std::noboolalpha << ")");
+  ROS_DEBUG_STREAM("updateRunPermitted(" << std::boolalpha << run_permitted << std::noboolalpha << ")");
   {
     std::lock_guard<std::mutex> lock(sm_mutex_);
-    state_machine_->process_event(typename StoStateMachine::sto_updated(sto));
+    state_machine_->process_event(typename RunPermittedStateMachine::run_permitted_updated(run_permitted));
   }
   worker_cv_.notify_one();
 }
 
-bool Stop1Executor::updateStoCallback(std_srvs::SetBool::Request &req,
-                                      std_srvs::SetBool::Response &res)
+bool Stop1Executor::updateRunPermittedCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res)
 {
-  updateSto(req.data);
+  updateRunPermitted(req.data);
   res.success = true;
   return true;
 }
@@ -77,17 +73,16 @@ void Stop1Executor::workerThreadFun()
       break;
     }
 
-    AsyncStoTask task = state_machine_->task_queue_.front();
+    AsyncRunPermittedTask task = state_machine_->task_queue_.front();
     state_machine_->task_queue_.pop();
 
-    sm_lock.unlock();               // | This part is executed async from
-    task.execute();                 // | the state machine since new sto updates need to be handled
+    sm_lock.unlock();  // | This part is executed async from
+    task.execute();    // | the state machine since new run_permitted updates need to be handled
     // | during service calls.
-    sm_lock.lock();                 // |
+    sm_lock.lock();  // |
 
-    task.signalCompletion();  //Could add Task to Queue and does process_event on the state machine. Needs lock.
+    task.signalCompletion();  // Could add Task to Queue and does process_event on the state machine. Needs lock.
   }
 }
 
-
-} // namespace prbt_hardware_support
+}  // namespace prbt_hardware_support

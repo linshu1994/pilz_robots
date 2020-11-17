@@ -7,6 +7,30 @@ Forthcoming
 * changing references from pilz_command_planner to pilz_industrial_motion_planner
 * Contributors: Pilz GmbH and Co. KG
 
+0.5.19 (2020-09-07)
+-------------------
+* Move ikfast plugin test to prbt_moveit_config (#450)
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.18 (2020-07-02)
+-------------------
+
+0.5.17 (2020-06-22)
+-------------------
+
+0.5.16 (2020-05-15)
+-------------------
+
+0.5.15 (2020-05-03)
+-------------------
+* Use default hardware setup in moveit_planning_execution.launch
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.14 (2020-03-11)
+-------------------
+* add pipeline for merging the planner into moveit (old pipeline still available)
+* Contributors: Pilz GmbH and Co. KG
+
 0.5.13 (2019-12-04)
 -------------------
 

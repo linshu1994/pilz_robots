@@ -29,26 +29,25 @@
 #include <std_srvs/Trigger.h>
 #include <std_srvs/SetBool.h>
 
-#include <prbt_hardware_support/sto_state_machine.h>
+#include <prbt_hardware_support/run_permitted_state_machine.h>
 #include <prbt_hardware_support/service_function_decl.h>
 
 namespace prbt_hardware_support
 {
-
 /**
  * @brief Performs service calls for Stop1 and the respective reversal,
  * that is enabling the manipulator. Incoming
- * updates of the STO state are handled asynchronously.
+ * updates of the RUN_PERMITTED state are handled asynchronously.
  *
  * In order to handle the asynchrony of events, a state machine is used to
  * represent the current state. The state machine
  * manages a task queue for the currently required service call.
  *
  * General behaviour:
- *  - STO == false:   perfom Stop1 (hold controller + halt drives)
- *  - STO == true:    recover drives + unhold controller
+ *  - RUN_PERMITTED == false:   perfom Stop1 (hold controller + halt drives)
+ *  - RUN_PERMITTED == true:    recover drives + unhold controller
  *
- * @note Unhold the controller is skipped if STO changes during recover.
+ * @note Unhold the controller is skipped if RUN_PERMITTED changes during recover.
  * This avoids the superfluous execution of a hold trajectory, which would
  * result in an overlong stopping time.
  *
@@ -66,10 +65,8 @@ public:
    * start worker-thread and state machine.
    *
    */
-  Stop1Executor(const TServiceCallFunc& hold_func,
-                const TServiceCallFunc& unhold_func,
-                const TServiceCallFunc& recover_func,
-                const TServiceCallFunc& halt_func);
+  Stop1Executor(const TServiceCallFunc& hold_func, const TServiceCallFunc& unhold_func,
+                const TServiceCallFunc& recover_func, const TServiceCallFunc& halt_func);
 
   /**
    * @brief Stop state machine and terminate worker-thread.
@@ -77,19 +74,18 @@ public:
   virtual ~Stop1Executor();
 
   /**
-   * @brief This is called everytime an updated sto value is obtained.
+   * @brief This is called everytime an updated run_permitted value is obtained.
    *
-   * Process sto_updated event and notify worker-thread in case it is waiting
+   * Process run_permitted_updated event and notify worker-thread in case it is waiting
    * for new required tasks.
    *
    * @note
    * Access to the state machine is protected for thread-safety.
    *
-   * @param sto The updated sto value.
+   * @param run_permitted The updated run_permitted value.
    */
-  void updateSto(const bool sto);
-  bool updateStoCallback(std_srvs::SetBool::Request &req,
-                         std_srvs::SetBool::Response &res);
+  void updateRunPermitted(const bool run_permitted);
+  bool updateRunPermittedCallback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
 
 protected:
   /**
@@ -100,10 +96,9 @@ protected:
   void stopStateMachine();
 
 private:
-
   /**
    * @brief This is executed in the worker-thread and allows asynchronous
-   * handling of sto updates.
+   * handling of run_permitted updates.
    *
    * Wait for notification if the task queue of the state machine is empty.
    * Once a task is present, execute it and signal its completion.
@@ -117,10 +112,10 @@ private:
 
 private:
   //! State machine
-  std::unique_ptr<StoStateMachine> state_machine_;
+  std::unique_ptr<RunPermittedStateMachine> state_machine_;
 
   //! Flag indicating if the worker-thread should terminate
-  std::atomic_bool terminate_{false};
+  std::atomic_bool terminate_{ false };
 
   //! Mutex for protecting access to the state machine, needs to be owned when
   //! triggering an event of the state machine
@@ -131,7 +126,6 @@ private:
 
   //! Worker-thread
   std::thread worker_thread_;
-
 };
 
 inline void Stop1Executor::stopStateMachine()
@@ -140,6 +134,6 @@ inline void Stop1Executor::stopStateMachine()
   state_machine_->stop();
 }
 
-} // namespace prbt_hardware_support
+}  // namespace prbt_hardware_support
 
-#endif // STOP1_EXECUTOR_H
+#endif  // STOP1_EXECUTOR_H

@@ -2,6 +2,33 @@
 Changelog for package pilz_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.5.19 (2020-09-07)
+-------------------
+
+0.5.18 (2020-07-02)
+-------------------
+* Make AsyncTest header-only
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.17 (2020-06-22)
+-------------------
+* Add JointStatePublisherMock
+* Add LoggerMock
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.16 (2020-05-15)
+-------------------
+* Update and apply clang-format (#387)
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.15 (2020-05-03)
+-------------------
+* add timeout to AsyncTest::barricade()
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.14 (2020-03-11)
+-------------------
+
 0.5.13 (2019-12-04)
 -------------------
 

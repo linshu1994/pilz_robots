@@ -26,6 +26,10 @@ sudo apt install ros-melodic-pilz-robots
 `melodic-devel` is considered to be the active development branch.
 Relevant changes are cherry-picked into `kinetic-devel` on a case-by-case basis.
 
+### Supported hardware versions
+PRBT firmware version 1.1.0
+
+If you want to update your PRBT firmware please contact our [repair center](https://www.pilz.com/en-INT/support/repair-service).
 
 
 ## Package: prbt_support
@@ -81,7 +85,7 @@ The launch file allows to set optional parameters
        it inside your package folder, set the path and file name here.
 * `gripper` (default: None) <br>
     See [Running the prbt with a gripper](#running-the-prbt-with-a-gripper)
-* `sto` (default: pnoz)<br>
+* `safety_hw` (default: pss4000)<br>
     Connect to the safety controller that handles the safe-torque-off signal.
 	Only relevant for `sim:=False` to issue a Safe stop 1.
 	See [prbt_hardware_support package](prbt_hardware_support/README.md).
@@ -137,6 +141,10 @@ wrapper of `ikfast.cpp` to the kinematics base interface of moveit.
 ## Package: pilz_control
 Contains a specialized version of `ros_controllers::JointTrajectoryController` which can be put into a holding mode.
 A controlled stop using a hold trajectory is performed thus stopping the manipulator without the mechanical stress of a hard brake.
+Further, the controller monitors cartesian speed and joint accelerations to fulfill the requirements of the selected operation mode.
+
+**Topic interface deprecated:**
+See [here](pilz_control/README.md)
 
 ## Package: prbt_hardware_support
 This package provides support for the Pilz hardware PNOZmulti and PSS4000. A configurable modbus connection is set up via

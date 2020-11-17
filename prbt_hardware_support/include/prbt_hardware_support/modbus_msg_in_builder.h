@@ -28,26 +28,25 @@
 
 namespace prbt_hardware_support
 {
-
 /**
  * @brief Help on construction for ModbusMsgIn Messages.
  *
- * Mainly intented for usage in tests.
+ * Mainly intended for usage in tests.
  *
  */
 class ModbusMsgInBuilder
 {
 public:
-  ModbusMsgInBuilder(const ModbusApiSpec &api_spec);
+  ModbusMsgInBuilder(const ModbusApiSpec& api_spec);
 
 public:
   void setRegister(const unsigned int register_n, const uint16_t value);
 
-  ModbusMsgInBuilder& setSto(const uint16_t sto);
+  ModbusMsgInBuilder& setRunPermitted(const uint16_t run_permitted);
   ModbusMsgInBuilder& setOperationMode(const uint16_t mode);
   ModbusMsgInBuilder& setApiVersion(const uint16_t version);
 
-  ModbusMsgInStampedPtr build(const ros::Time &time) const;
+  ModbusMsgInStampedPtr build(const ros::Time& time) const;
 
 public:
   /**
@@ -61,16 +60,15 @@ public:
                                const std_msgs::MultiArrayLayout::_data_offset_type& offset,
                                const RegCont::size_type& size);
 
-
 private:
   const ModbusApiSpec api_spec_;
   std::map<unsigned int, uint16_t> register_values_;
 };
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-inline ModbusMsgInBuilder& ModbusMsgInBuilder::setSto(const uint16_t sto)
+inline ModbusMsgInBuilder& ModbusMsgInBuilder::setRunPermitted(const uint16_t run_permitted)
 {
-  setRegister(api_spec_.getRegisterDefinition(modbus_api_spec::STO), sto);
+  setRegister(api_spec_.getRegisterDefinition(modbus_api_spec::RUN_PERMITTED), run_permitted);
   return *this;
 }
 
@@ -86,12 +84,11 @@ inline ModbusMsgInBuilder& ModbusMsgInBuilder::setApiVersion(const uint16_t vers
   return *this;
 }
 
-inline void ModbusMsgInBuilder::setRegister(const unsigned int register_n,
-                                            const uint16_t value)
+inline void ModbusMsgInBuilder::setRegister(const unsigned int register_n, const uint16_t value)
 {
   register_values_[register_n] = value;
 }
 
-}
+}  // namespace prbt_hardware_support
 
-#endif // MODBUS_MSG_IN_BUILDER_H
+#endif  // MODBUS_MSG_IN_BUILDER_H

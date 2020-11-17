@@ -2,8 +2,28 @@
 Changelog for package pilz_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.5.19 (2020-09-07)
+-------------------
+
+0.5.18 (2020-07-02)
+-------------------
+
+0.5.17 (2020-06-22)
+-------------------
+* Remove extended ROS sleep function
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.16 (2020-05-15)
+-------------------
+* Update and apply clang-format (#387)
+* Contributors: Pilz GmbH and Co. KG
+
+0.5.15 (2020-05-03)
+-------------------
+* Fix coverage generation for pilz_utils
+
+0.5.14 (2020-03-11)
+-------------------
 * Rename waitForTopic() -> waitForMessage()
 * Contributors: Pilz GmbH and Co. KG
 

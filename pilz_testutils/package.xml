@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pilz_testutils</name>
-  <version>0.5.13</version>
+  <version>0.5.19</version>
   <description>This package contains testing utilities used by Pilz packages.</description>
 
   <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
@@ -18,4 +18,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
+  <build_depend>pilz_utils</build_depend>
+  <build_depend>sensor_msgs</build_depend>
 </package>

@@ -26,7 +26,6 @@
 
 namespace prbt_hardware_support
 {
-
 /**
  * @brief Checks if a node is up and running.
  * @param node_name
@@ -41,19 +40,53 @@ inline bool checkForNode(std::string node_name)
 
 /**
  * @brief Blocks until a node defined by node_name comes up.
- * @param node_name
+ * @param node_name The name of the node to wait for.
  * @param loop_frequency Frequency at which the system is checked for the node.
  */
-inline void waitForNode(std::string node_name, double loop_frequency = 10.0)
+inline ::testing::AssertionResult waitForNode(const std::string node_name, const double loop_frequency = 10.0,
+                                              const ros::Duration timeout = ros::Duration(10.0))
 {
   ROS_INFO_STREAM("Waiting for Node " << node_name);
   std::vector<std::string> node_names;
+  const auto timeout_time = ros::Time::now() + timeout;
+
   while (ros::master::getNodes(node_names) &&
          std::find(node_names.begin(), node_names.end(), node_name) == node_names.end())
   {
+    if (ros::Time::now() > timeout_time)
+    {
+      return ::testing::AssertionFailure() << "Timeout while waiting for node: \"" << node_name << "\"";
+    }
     ros::Rate(loop_frequency).sleep();
   }
-  ROS_INFO_STREAM("Node " << node_name << " found");
+  return ::testing::AssertionSuccess() << "Found note \"" << node_name << "\"";
+}
+
+/**
+ * @brief Blocks until the specified number of subscribers is registered on a topic.
+ * @param publisher The publisher of the topic.
+ * @param subsciber_count Number of subscribers to wait for.
+ * @param loop_frequency Frequency at which topic is checked for subscribers.
+ */
+inline ::testing::AssertionResult waitForSubscriber(const ros::Publisher& publisher,
+                                                    const unsigned int subscriber_count = 1,
+                                                    const double loop_frequency = 10.0,
+                                                    const ros::Duration timeout = ros::Duration(10.0))
+{
+  ROS_INFO_STREAM("Waiting for " << subscriber_count << " subscriber to topic \"" << publisher.getTopic() << "\"");
+  ros::Rate rate(loop_frequency);
+  const auto timeout_time = ros::Time::now() + timeout;
+  while (publisher.getNumSubscribers() < subscriber_count && ros::ok())
+  {
+    if (ros::Time::now() > timeout_time)
+    {
+      return ::testing::AssertionFailure() << "Timeout while waiting for " << subscriber_count
+                                           << " subscriber to topic \"" << publisher.getTopic() << "\"";
+    }
+    rate.sleep();
+  }
+  return ::testing::AssertionSuccess() << "Registered " << subscriber_count << " subscriber to topic \""
+                                       << publisher.getTopic() << "\"";
 }
 
 /**
@@ -62,7 +95,8 @@ inline void waitForNode(std::string node_name, double loop_frequency = 10.0)
  * @param timeout
  * @param loop_frequency Frequency at which the system is checked for the node.
  */
-inline ::testing::AssertionResult waitForNodeShutdown(std::string node_name, double timeout = 1.0, double loop_frequency = 10.0)
+inline ::testing::AssertionResult waitForNodeShutdown(std::string node_name, double timeout = 1.0,
+                                                      double loop_frequency = 10.0)
 {
   std::vector<std::string> node_names;
   auto start_time = ros::Time::now();
@@ -79,10 +113,10 @@ inline ::testing::AssertionResult waitForNodeShutdown(std::string node_name, dou
   return ::testing::AssertionSuccess();
 }
 
-template<class T>
-static void initalizeAndRun(T& obj, const char *ip, unsigned int port)
+template <class T>
+static void initalizeAndRun(T& obj, const char* ip, unsigned int port)
 {
-  if ( !obj.init(ip, port) )
+  if (!obj.init(ip, port))
   {
     ROS_ERROR("Initialization failed.");
     return;
@@ -94,5 +128,4 @@ static void initalizeAndRun(T& obj, const char *ip, unsigned int port)
 
 }  // namespace prbt_hardware_support
 
-
-#endif // PRBT_HARDWARE_SUPPORT_ROS_TEST_HELPER_H
+#endif  // PRBT_HARDWARE_SUPPORT_ROS_TEST_HELPER_H
